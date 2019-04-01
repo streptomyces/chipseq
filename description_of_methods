@@ -1,0 +1,68 @@
+ChIP-seq data analysis
+======================
+
+A combination of stand-alone tools, Perl scripts, BioPerl toolkit
+and R was used to carry out the following steps. Where possible,
+GNU Parallel was used to process multiple data sets in parallel.
+
+1. The reads in the fastq files received from the sequencing
+contractor were aligned to the S. venezuelae genome (GenBank
+accession number CP018074) using the bowtie2 software (version
+2.2.9), which resulted in one SAM (.sam) file for each pair of
+fastq files (paired-end sequencing).
+
+2. For each sam file, the depth command of samtools (version 1.8)
+was used to arrive at the depth of sequencing at each nucleotide
+position of the S. venezuelae chromosome.
+
+3. From the sequencing depths at each nucleotide position
+determined in 2, a local enrichment was calculated in a moving
+window of 30 nucleotides moving in steps of 15 nucleotides as
+(the mean depth at each nucleotide position in the 30-nt window)
+divided by (the mean depth at each nucleotide position in a
+3000-nucleotide window centered around the 30-nucleotide window).
+This results in an enrichment ratio value for every 15
+nucleotides along the genome. The enrichment ratios thus
+calculated were stored in files in the bedgraph format and were
+used for viewing in IGB.
+
+4. After ensuring good correlation between the replicates
+(Spearman correlation coefficient > 0.85) the mean of the
+replicates was calculated and used in further calculations.
+
+5. Enrichment in the control was subtracted from the enrichment
+in the WT files.
+
+6. Significance of enrichment was calculated assuming normal
+distribution of the control-subtracted enrichment values and rows
+ordered from low to high P-values.
+
+7. Association of regions of enrichment with P-values below 1e-4
+with genes on the chromosome was done by simply listing genes
+left and right of the region. Rows of lower significance with the
+same context of genes were removed to leave the most significant
+row for each combination of left, right and "within" genes. Also,
+genes had to be in the right orientation and within 500
+nucleotides of the enriched region for association with the
+region.
+
+8. The final list of genes was ultimately checked by visual
+inspection of depth in the region in IGB.
+
+
+
+References:
+
+Langmead B, Salzberg S. Fast gapped-read alignment with Bowtie 2.
+Nature Methods. 2012, 9:357-359.
+
+R Core Team (2018). R: A language and environment for statistical
+computing. R Foundation for Statistical Computing, Vienna, Austria.
+URL https://www.R-project.org/.
+
+BioPerl(2018). https://bioperl.org/
+
+samtools(2018). https://www.sanger.ac.uk/science/tools/samtools-bcftools-htslib)
+
+Tange Ole (2018). GNU Parallel https://doi.org/10.5281/zenodo.1146014
+
