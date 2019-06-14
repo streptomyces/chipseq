@@ -54,6 +54,9 @@ GetOptions (
 perl code/bedgraph_diff.pl -outfile stuff.bedgraph \
 -- bedgraph/J2_ln.bedgraph bedgraph/WT2_ln.bedgraph
 
+perl code/bedgraph_diff.pl -outfile bedgraph/diff1.bedgraph \
+-- bedgraph/tpm_3Flag1.bedgraph bedgraph/tpm_WT1.bedgraph
+
 ~~~
 
 ## Description

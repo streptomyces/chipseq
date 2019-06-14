@@ -1,3 +1,56 @@
+1. fastq to sam. bowtie2.
+
+bowtie2 --no-unal -p 8 -x /mnt/isilon/bowtie2Indexes/avin/avin \
+--minins 100 --maxins 800 -1 fqgz/3Flag1_R1_001.fastq.gz \
+-2 fqgz/3Flag1_R2_001.fastq.gz \
+-S sam/3Flag1.sam 2> bowtie2reports/3Flag1.bowtie2
+
+2. sam to sorted.bam. samtools.
+
+3. rscounts.txt. Rsubread.
+
+4. tpm.txt. R.
+
+5. tpm.txt to bedgraphs. Perl.
+
+perl code/rscounts2bedgraph.pl -sectlen 30 -genolen 5365318 \
+-dirout bedgraph -outpre tpm_ -- tpm.txt
+
+rscounts2bedgraph.pl is also used to make bedgraph files for
+unmodified read counts and normalised read counts.
+
+6. Mean of replicates. Perl. 
+
+perl code/bedgraph_mean.pl -outfile bedgraph/tpm_3Flag.bedgraph \
+-- bedgraph/tpm_3Flag1.bedgraph bedgraph/tpm_3Flag2.bedgraph
+
+perl code/bedgraph_mean.pl -outfile bedgraph/tpm_WT.bedgraph \
+-- bedgraph/tpm_WT1.bedgraph bedgraph/tpm_WT2.bedgraph
+
+7. logFC between 3Flag and WT. Perl.
+
+perl code/bedgraph_log2ratio.pl -outfile bedgraph/lfc.bedgraph \
+-- bedgraph/tpm_3Flag.bedgraph bedgraph/tpm_WT.bedgraph
+
+bedgraph_log2ratio has the following line in it
+
+ if($signal < 0.5 and $baseline < 0.5) { next; }
+
+to filter out sections for which both the log2 TPM values are
+very low.
+
+8. lfc.bedgraph to siglfc.txt. R.
+
+pos     lfc     apv
+128984  2.1978177277655         5.87067696130609e-179
+129014  2.19129492719055        3.47052822746311e-178
+129044  2.15352819746332        3.25962879030572e-172
+128954  2.14754011049906        2.25637279873988e-171
+
+9. siglfc.txt to lir.txt
+
+
+
 ChIP-seq data analysis
 ======================
 

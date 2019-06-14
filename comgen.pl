@@ -129,7 +129,6 @@ if(-s $conffile ) {
     $keyCnt += 1;
   }
   close($cnfh);
-  linelistE("$keyCnt keys placed in conf.");
 }
 elsif($conffile ne "local.conf") {
 linelistE("Specified configuration file $conffile not found.");
@@ -141,6 +140,7 @@ my %sample;
 
 opendir(DIR, "fqgz");
 while(my $bn = readdir(DIR)) {
+  if($bn !~ m/\.fastq\.gz$/) { next; }
   my $file = File::Spec->catfile("fqgz", $bn);
   if(-f $file and $file =~ m/_R1_/) {
     my $read1 = $file;
@@ -152,7 +152,7 @@ while(my $bn = readdir(DIR)) {
   }
 }
 
-my $bwt2ndx = qq(/mnt/isilon/bowtie2Indexes/vnz/chr);
+my $bwt2ndx = $conf{bowtie2index};
 my $testopt;
 if($testCnt) {
 $testopt = qq/--qupto $testCnt/;

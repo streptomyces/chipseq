@@ -21,6 +21,7 @@ my $conffile = qq(local.conf);
 my $errfile;
 my $runfile;
 my $outfile;
+my $dbfile = '/home/sco/sqlite/avin.sqlite';
 my $testCnt = 0;
 our $verbose;
 my $skip = 0;
@@ -33,6 +34,7 @@ GetOptions (
 "extension:s" => \$outex,
 "conffile:s" => \$conffile,
 "errfile:s" => \$errfile,
+"sqlitefile|dbfile:s" => \$dbfile,
 "runfile:s" => \$runfile,
 "testcnt:i" => \$testCnt,
 "skip:i" => \$skip,
@@ -43,35 +45,14 @@ GetOptions (
 
 # {{{ POD markdown
 
-=pod
+=head2 Name
 
-=begin markdown
+lir.pl
 
-# script.pl
+=head2 Examples
 
-## Usage
+perl code/lir.pl -outfile lir.txt -- siglfc.txt
 
-~~~ {.sh}
-
-perl script.pl -outfile outfn -- infile1 infile2 infile3 ...
-
-~~~
-
-## Description
-
-A description of what this script does.
-
-## Options
-
-* -outfile
-* -errfile
-* -testcnt: Defaults to 0 which means process all input.
-* -conffile: Defaults to local.conf
-* -help: Display this documentation and exit.
-
-These are the commonly used one. There are a few more.
-
-=end markdown
 
 =cut
 
@@ -81,7 +62,6 @@ if($help) {
 exec("perldoc $0");
 exit;
 }
-my $dbfile = '/home/sco/sqlite/vnz.sqlite';
 my $handle = DBI->connect("DBI:SQLite:dbname=$dbfile", '', '');
 
 # {{{ open the errfile
@@ -203,7 +183,7 @@ for my $infile (@infiles) {
     if($line=~m/^\s*\#/ or $line=~m/^\s*$/) {next;}
     my @ll=split(/\t/, $line);
     my ($pos, $enrich, $apv) = @ll;
-    unless($enrich >= 1.5) { next; }
+    # unless($enrich >= 1.5) { next; }
     my %lir = lir($pos, 0); # The second argument is boolean for direction.
 
     my (%left, %right, %in);

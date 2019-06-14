@@ -47,11 +47,19 @@ bedgraph_diff.pl
 
 =head2 Examples
 
-perl code/bedgraph_mean.pl -outfile bedgraph/tpm_3Flag.bedgraph \
--- bedgraph/tpm_3Flag1.bedgraph bedgraph/tpm_3Flag2.bedgraph
 
-perl code/bedgraph_mean.pl -outfile bedgraph/tpm_WT.bedgraph \
--- bedgraph/tpm_WT1.bedgraph bedgraph/tpm_WT2.bedgraph
+perl code/bedgraph_log2ratio.pl -outfile bedgraph/lfc1.bedgraph \
+-- bedgraph/tpm_3Flag1.bedgraph bedgraph/tpm_WT1.bedgraph
+
+perl code/bedgraph_log2ratio.pl -outfile bedgraph/lfc.bedgraph \
+-- bedgraph/tpm_3Flag.bedgraph bedgraph/tpm_WT.bedgraph
+
+=head2 Description
+
+log2 of column 4 of the first bedgraph file minus the log2 of
+column 4 of the second bedgraph file.
+
+The input file could come from bedgraph_mean.pl.
 
 =cut
 
@@ -150,14 +158,15 @@ else {
 
 # }}}
 
-my @lol;
-my @head;
+my @lr1;
+my @lr2;
 my $head1;
 my $head2;
 
 # {{{ Cycle through all the infiles.
 my $cycle = 0;
 for my $infile (@infiles) {
+  $cycle += 1;
 my ($noex, $dir, $ext)= fileparse($infile, qr/\.[^.]*/);
 my $bn = $noex . $ext;
 # tablistE($infile, $bn, $noex, $ext);
@@ -170,17 +179,24 @@ select(OFH);
 
 open(my $ifh, "<$infile") or croak("Could not open $infile");
 my $lineCnt = 0;
-my $temp = readline($ifh); chomp($temp);
-$head[$cycle] = $temp;
-
-
+if($cycle == 1) {
+$head1 = readline($ifh); chomp($head1)
+}
+if($cycle == 2) {
+$head2 = readline($ifh); chomp($head2);
+}
 
 # local $/ = ""; # For reading multiline records separated by blank lines.
 while(my $line = readline($ifh)) {
 chomp($line);
 if($line=~m/^\s*\#/ or $line=~m/^\s*$/) {next;}
 my @ll=split(/\t/, $line);
-push(@{$lol[$cycle]}, \@ll);
+if($cycle == 1) {
+push(@lr1, \@ll);
+}
+elsif($cycle == 2) {
+push(@lr2, \@ll);
+}
 
 $lineCnt += 1;
 if($testCnt and $lineCnt >= $testCnt) { last; }
@@ -189,34 +205,30 @@ if($runfile and (not -e $runfile)) { last; }
 close($ifh);
 close(OFH);
 
-$cycle += 1;
 }
 # }}}
 
-unless(checklol(@lol)) {
+unless($#lr1 == $#lr2) {
 croak("Lists not of the same length\n");
 }
 
+$head1 =~ s/name=(.*?)\s/name=$1_diff /;
+$head1 =~ s/description=(.*?)$/description=$1_lfc/;
+$head1 =~ s/_mean//g;
 
+linelist($head1);
+for(my $dx = 0; $dx <= $#lr1; $dx += 1) {
 
-$head[0] =~ s/name=(.*?)\s/name=$1_mean /;
-$head[0] =~ s/description=(.*?)$/description=$1_mean/;
-$head[0] =~ s/A//g;
+my $signal = log2($lr1[$dx]->[3]);
+my $baseline = log2($lr2[$dx]->[3]);
+my $lfc = $signal - $baseline;
 
-linelist($head[0]);
+if($signal < 0.5 and $baseline < 0.5) { next; }
 
-
-my @fl = @{$lol[0]};
-
-for(my $dx = 0; $dx <= $#fl; $dx += 1) {
-my $rowtot = 0;
-for my $lr (@lol) {
-$rowtot += $lr->[$dx]->[3];
+my @ol = @{$lr1[$dx]};
+$ol[3] = $lfc;
+tablist(@ol);
 }
-my $mean = $rowtot / scalar(@lol);
-tablist(@{$fl[$dx]}[0..2], $mean);
-}
-
 
 
 exit;
@@ -230,23 +242,11 @@ close(ERRH);
 }
 
 
-sub checklol {
-my @lol = @_;
-my @lens;
-
-for my $lr (@lol) {
-push(@lens, scalar(@{$lr}));
+sub log2 {
+my $num = shift(@_);
+$num += 1;
+if($num < 0) { return 0; }
+else {
+return(log($num) / log(2));
 }
-
-my $first = shift(@lens);
-
-for my $len (@lens) {
-  if($len != $first) {
-    tablistE($first, @lens);
-    return(0);
-  }
 }
-
-return(1);
-}
-

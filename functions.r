@@ -32,21 +32,21 @@ return(f_int);
 
 # {{{ mb.sam2cov()
 mb.sam2cov <- function(saf.file, sam.path) {
+sam.path <- c("../sam");
+saf.file <- c("../Avin_chipseq.saf");
 sam.files <- list.files(path = sam.path, pattern = "\\.sorted\\.bam$",
 full.names = TRUE);
 
 fc <- featureCounts(annot.ext = saf.file, nthreads = 12,
 allowMultiOverlap = TRUE, isPairedEnd = TRUE,
 countChimericFragments = TRUE, minMQS = 38, nonSplitOnly = TRUE,
-requireBothEndsMapped = FALSE,
+requireBothEndsMapped = TRUE,
 files = sam.files);
 
 counts <- fc$counts;
 
 cn <- colnames(counts);
-
-ncn <- sub("^\\.\\.\\..*sam\\.", "", cn)
-
+ncn <- sub("^.*sam\\.", "", cn)
 ncn <- sub("\\.sorted\\.bam$", "", ncn);
 # ncn <- sub("8", "08", ncn);
 
@@ -62,6 +62,13 @@ colnames(counts) <- ncn
 # write.table(odf, file = ofn, quote = F, sep = "\t", col.names = F,
 # row.names = T)
 # }
+
+ofh <- file("../rscounts.txt", open = "wt");
+row1 <- c("section", colnames(counts))
+ts <- paste(row1, collapse = "\t");
+writeLines(ts, con = ofh);
+write.table(counts, file = ofh, col.names = F, row.names = T, quote = F, sep = "\t")
+close(ofh);
 
 return(counts);
 

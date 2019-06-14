@@ -151,8 +151,8 @@ select($ofh);
 
 
 #  sub seqObj2featuresSQLite %(seqobj or filename, sqlitefn)
-$scogbk->seqObj2featuresSQLite(filename => "vnz.gbk",
-sqlitefn => "/home/sco/sqlite/vnz.sqlite");
+$scogbk->seqObj2featuresSQLite(filename => "Avin.gbk",
+sqlitefn => "/home/sco/sqlite/avin.sqlite");
 
 exit;
 
