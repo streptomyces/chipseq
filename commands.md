@@ -155,7 +155,6 @@ writeLines(ts, con = ofh);
 write.table(tpmat, file = ofh, col.names = F, row.names = T, quote = F, sep = "\t")
 close(ofh);
 
-
 ~~~
 
 Below, write bedgraph files for each column in rscounts.txt.
@@ -187,7 +186,7 @@ perl code/bedgraph_log2ratio.pl -outfile bedgraph/lfc.bedgraph \
 
 
 
-~~~ 
+~~~ {.r} 
 
 rm(list=ls());
 lfc <- read.table("../bedgraph/lfc.bedgraph", skip = 1, sep = "\t",
@@ -211,6 +210,29 @@ write.table(sigdf, file = "../siglfc.txt", quote = F, sep = "\t",
 row.names = F, col.names = T);
 
 
+~~~
 
+### Fri 14 Jun 2019
+
+~~~ 
+perl code/lir.pl -outfile lir.txt -- siglfc.txt
 
 ~~~
+
+The whole bedgraph directory and lir.txt were put on
+/home/sco/mnt/rgray/govind/corinne/ and Corinne informed verbally.
+
+
+### Sat 15 Jun 2019
+
+542G.
+
+~~~ 
+
+rsync -F -F --copy-links -rivtn 2019_06_05 \
+/home/sco/mnt/rgray/govind/
+
+~~~
+
+
+

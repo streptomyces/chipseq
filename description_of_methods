@@ -39,7 +39,7 @@ bedgraph_log2ratio has the following line in it
 to filter out sections for which both the log2 TPM values are
 very low.
 
-8. lfc.bedgraph to siglfc.txt. R.
+8. lfc.bedgraph to siglfc.txt. R. Threshold of significance is here.
 
 pos     lfc     apv
 128984  2.1978177277655         5.87067696130609e-179
@@ -47,7 +47,9 @@ pos     lfc     apv
 129044  2.15352819746332        3.25962879030572e-172
 128954  2.14754011049906        2.25637279873988e-171
 
-9. siglfc.txt to lir.txt
+9. siglfc.txt to lir.txt. Perl.
+
+perl code/lir.pl -outfile lir.txt -- siglfc.txt
 
 
 

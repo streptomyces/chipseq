@@ -184,7 +184,7 @@ for my $infile (@infiles) {
     my @ll=split(/\t/, $line);
     my ($pos, $enrich, $apv) = @ll;
     # unless($enrich >= 1.5) { next; }
-    my %lir = lir($pos, 0); # The second argument is boolean for direction.
+    my %lir = lir($pos);
 
     my (%left, %right, %in);
     if(ref($lir{left})) {
@@ -196,8 +196,7 @@ for my $infile (@infiles) {
     if(ref($lir{in})) {
       %in = %{$lir{in}};
     }
-
-
+# Below, direction is considered when printing left and right genes.
     my @out;
     my @strlir;
     push(@out, split("", "-" x 9));
@@ -246,7 +245,7 @@ close(ERRH);
 # {{{ sub lir
 sub lir {
   my $pos = shift(@_);
-  my $direction = shift(@_);
+  my $direction = 0;
   my %lir;
 # {{{ left
   my $qstr = qq/select max(end_pos) from features where end_pos < $pos/;
@@ -309,6 +308,7 @@ sub lir {
 }
 # }}}
 
+# {{{ sub dist
 sub dist {
 my $pos = shift(@_);
 my $gr = shift(@_);
@@ -323,41 +323,9 @@ $dist = $codon_start - $pos;
 }
 return($dist);
 }
+# }}}
 
 
 __END__
-
-
-my @values = ();
-foreach my $key (sort keys(%{$hr})) {
-push(@values, $hr->{$key});
-}
-print(++$serial,"\t",join("\t", @values), "\n");
-
-}
-$stmt->finish();
-
-### selectrow_array ###
-my @row = $handle->selectrow_array($qstr);
-
-# Temporary tables. Start a transaction.
-$handle->begin_work();
-
- my($tmpfh, $table) = tempfile($template, DIR => undef, SUFFIX => undef);
- close($tmpfh); unlink($table);
- linelistE($table);
-
-# Create the temporary table as usual but with the additional clause
-# "on commit drop".
-
- $handle->do(qq/create temporary table $table (file text, locus_tag text,
-  bB1 text, bB2 text, bC1 text, bC2 text)
-  on commit drop/);
-
-# Now use the table however you wish and when you are done.
- $handle->commit();
-
-$handle->disconnect();
-
 
 
